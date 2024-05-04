@@ -1,0 +1,38 @@
+@import "src/assets/styles/style";
+
+.login-wrapper{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  .login-wrapper__container{
+    padding: 20px;
+    box-shadow: 0 8px 24px 0 rgba(129, 135, 189, 0.15);
+    border-radius: 10px;
+    max-width: 400px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .container__login-form{
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    h1{
+      font-size: 30px;
+      font-weight: 500;
+      margin-bottom: 30px;
+      color: $active-color;
+    }
+  }
+}
