@@ -50,6 +50,13 @@
       column-gap: 1%;
 
       .calculator-container__type-selector{
+        .type-selector__container{
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+          row-gap: 10px;
+        }
+
         h3{
           color: $active-color;
           font-weight: 400;
@@ -60,6 +67,14 @@
       .calculator-container__wall-selector{
         border-left: 1px solid $active-color;
         padding-left: 30px;
+
+        .wall-selector__container{
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+          row-gap: 10px;
+        }
+
         h3{
           color: $active-color;
           font-weight: 400;

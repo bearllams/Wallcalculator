@@ -6,6 +6,7 @@ import {useState} from "react";
 const AbscissaCalculator = ({ onCalculate, plasterData, constructionType, wallSelect  }) => {
     const [form] = Form.useForm();
     const [formDisabled, setFormDisabled] = useState(true)
+    const [fieldDisabled, setFieldDisabled] = useState(false)
     const interpolateFrequency = (density) => {
         if (density < 600) return frequencies[0];
         if (density >= 1800) return frequencies[6];
@@ -54,6 +55,7 @@ const AbscissaCalculator = ({ onCalculate, plasterData, constructionType, wallSe
             const result = calculateAbscissa(values);
             message.success(`Абсцисса равна: ${result.abscissa} Гц`)
             onCalculate(result);
+            setFieldDisabled(true)
         });
     };
 
@@ -66,10 +68,10 @@ const AbscissaCalculator = ({ onCalculate, plasterData, constructionType, wallSe
             <h3>{constructionType === "floor" ? `3` : `4`} Расчет абсциссы</h3>
             <Form form={form} onValuesChange={handleFormChange} layout="vertical" className="abscissa-calculate__form">
                 <Form.Item name="density" label="Плотность материала (кг/м3)" rules={[{message:'Пожаулуйста, введите плотность материала', required: true }]}>
-                    <Input type="number" addonAfter="кг/м³" />
+                    <Input disabled={fieldDisabled} type="number" addonAfter="кг/м³" />
                 </Form.Item>
                 <Form.Item name="thickness" label="Толщина стены (мм)" rules={[{message:'Пожаулуйста, введите толщину стены',  required: true }]}>
-                    <Input type="number" addonAfter="мм" />
+                    <Input disabled={fieldDisabled} type="number" addonAfter="мм" />
                 </Form.Item>
                 <Form.Item>
                     <Button type="primary" onClick={handleCalculate} disabled={formDisabled}>Рассчитать</Button>

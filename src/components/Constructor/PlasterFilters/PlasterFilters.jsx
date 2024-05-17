@@ -9,6 +9,8 @@ const PlasterFilters = ({onContinueClick}) => {
     const [plasterType, setPlasterType] = useState(null);
     const [densityK, setDensityK] = useState(null);
     const [showForm, setShowForm] = useState(false)
+    const [isEdit, setIsEdit] = useState(false)
+    const [fieldsDisabled, setFieldsDisabled] = useState(false)
     const {Option} = Select;
 
     const content_cement = (
@@ -35,25 +37,29 @@ const PlasterFilters = ({onContinueClick}) => {
     const handleFormChange = (_, allValues) => {
         const canProceed = allValues.plaster === 'yes' && plasterType && allValues.plasterDensity &&
             allValues.firstLayerThickness && allValues.secondLayerThickness;
-        setCanContinue(canProceed);
+        setCanContinue(canProceed || allValues.plaster === 'no' );
     };
 
     const handleContinueClick = () => {
         const plasterData = {
             plasterDensity: form.getFieldValue('plasterDensity') === '' ? 0 : form.getFieldValue('plasterDensity'),
             K: densityK === null ? 0: densityK,
+            plasterType: form.getFieldValue('plasterType') === '' ? '' : form.getFieldValue('plasterType'),
             firstLayerThickness: form.getFieldValue('firstLayerThickness') === '' ? 0 : form.getFieldValue('firstLayerThickness'),
             secondLayerThickness: form.getFieldValue('secondLayerThickness') === '' ? 0 : form.getFieldValue('secondLayerThickness'),
+            plaster: form.getFieldValue('plaster')
         };
-        console.log(plasterData)
-        onContinueClick(plasterData);
         setCanContinue(false)
+        onContinueClick(plasterData, isEdit);
+        setCanContinue(false)
+        setFieldsDisabled(true)
     };
 
     const handlePlasterTypeChange = value => {
         setPlasterType(value);
         form.resetFields(['density']);
         setCanContinue(false);
+        setIsEdit(true)
         setDensityK(null);
     };
 
@@ -99,6 +105,7 @@ const PlasterFilters = ({onContinueClick}) => {
                 onValuesChange={handleFormChange}
                 initialValues={{
                     plaster: 'no',
+                    plasterType: '',
                     firstLayerThickness: '',
                     secondLayerThickness: '',
                     plasterDensity: '',
@@ -106,28 +113,28 @@ const PlasterFilters = ({onContinueClick}) => {
             >
                 <Form.Item name="plaster">
                     <Radio.Group>
-                        <Radio value={'yes'} onClick={() => handleShowForm()}>Да</Radio>
-                        <Radio value={'no'} onClick={() => handleResetFields()}>Нет</Radio>
+                        <Radio value={'yes'} disabled={!canContinue} onClick={() => handleShowForm()}>Да</Radio>
+                        <Radio value={'no'} disabled={!canContinue} onClick={() => handleResetFields()}>Нет</Radio>
                     </Radio.Group>
                 </Form.Item>
                 {showForm && (
                     <>
                         <Form.Item name="plasterType" label="Тип штукатурки">
-                            <Select placeholder="Выберите тип" onChange={handlePlasterTypeChange}>
+                            <Select disabled={fieldsDisabled} placeholder="Выберите тип" onChange={handlePlasterTypeChange}>
                                 <Option value="gypsum">Гипсовая</Option>
                                 <Option value="cement">Цементная</Option>
                             </Select>
                         </Form.Item>
                         <Popover placement="right" title={'Таблица:'} content={content_cement}>
                             <Form.Item name="plasterDensity" label="Плотность штукатурки (кг/м3)">
-                                <Input onChange={handlePlasterDensityChange}/>
+                                <Input disabled={fieldsDisabled}  onChange={handlePlasterDensityChange}/>
                             </Form.Item>
                         </Popover>
                         <Form.Item name="firstLayerThickness" label="Толщина слоя штукатурки с первой стороны (мм)">
-                            <Input/>
+                            <Input disabled={fieldsDisabled} />
                         </Form.Item>
                         <Form.Item name="secondLayerThickness" label="Толщина слоя штукатурки со второй стороны (мм)">
-                            <Input/>
+                            <Input disabled={fieldsDisabled} />
                         </Form.Item>
                     </>
                 )}

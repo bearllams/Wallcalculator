@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Steps} from "antd";
+import {FloatButton, Steps} from "antd";
 import {SidebarMenu} from "../../components/index.js";
 import ConstructionTypeSelector from "../../components/Constructor/TypeSelector/TypeSelector.jsx";
 import AbscissaCalculator from "../../components/Constructor/AbscissaCalculator/AbscissaCalculator.jsx";
@@ -7,6 +7,8 @@ import OrdinateCalculator from "../../components/Constructor/OrdinateCalculator/
 import PlasterFilters from "../../components/Constructor/PlasterFilters/PlasterFilters.jsx";
 import WallFilters from "../../components/Constructor/WallFilters/WallFilters.jsx";
 import FrequencyResponseTable from "../../components/Constructor/FrequencyResponseTable/FrequencyResponseTable.jsx";
+import {FileWordOutlined, MenuOutlined, ReloadOutlined} from "@ant-design/icons";
+import {handleExportToWord} from "../../script/wordScript.js";
 import './_calculator-page.scss';
 
 const {Step} = Steps;
@@ -17,8 +19,14 @@ const CalculatorPage = () => {
     const [currentStep, setCurrentStep] = useState(0);
     const [plasterData, setPlasterData] = useState(null);
     const [wallData, setWallData] = useState(null);
-    const [rbData, setRbData] = useState(null);
-    const showTable =  wallData !== null && rbData !== null;
+    const [rbData, setRbData] = useState({
+        Rb: 0,
+        constructionType:'',
+        material: '',
+        densityAndK:''
+    });
+    const [tableData, setTableData] = useState([])
+    const showTable = wallData !== null && rbData.Rb !== 0;
     const handleConstructionTypeSelect = (value) => {
         setConstructionType(value);
         setCurrentStep(1);
@@ -26,10 +34,12 @@ const CalculatorPage = () => {
 
     const handleWallFilterSelect = (value) => {
         setWallSelect(value)
-        if (constructionType === "floor") {
-            setCurrentStep(currentStep + 2);
-        } else {
-            setCurrentStep(currentStep + 1);
+        if (wallSelect === null) {
+            if (constructionType === "floor") {
+                setCurrentStep(currentStep + 2);
+            } else {
+                setCurrentStep(currentStep + 1);
+            }
         }
     }
 
@@ -44,9 +54,10 @@ const CalculatorPage = () => {
         setCurrentStep(currentStep + 1);
     };
 
+
     useEffect(() => {
-        console.log(plasterData, wallData)
-    }, [plasterData, wallData]);
+        console.log('Табличные данные', tableData)
+    }, [tableData]);
 
     return (
         <div className="calculator-wrapper">
@@ -70,16 +81,32 @@ const CalculatorPage = () => {
                         <PlasterFilters onContinueClick={onContinueClick}/>
                     )}
                     {currentStep >= 3 && (
-                        <AbscissaCalculator wallSelect={wallSelect} constructionType={constructionType} plasterData={plasterData}
+                        <AbscissaCalculator wallSelect={wallSelect} constructionType={constructionType}
+                                            plasterData={plasterData}
                                             onCalculate={handleCalculateAbscissa}/>
                     )}
                     {currentStep >= 4 && (
-                        <OrdinateCalculator wallSelect={wallSelect} constructionTypeWall={constructionType} plasterData={plasterData} wallData={wallData} setRbData={setRbData}/>
+                        <OrdinateCalculator wallSelect={wallSelect} constructionTypeWall={constructionType}
+                                            plasterData={plasterData} wallData={wallData} setRbData={setRbData}/>
                     )}
                 </div>
                 {showTable && (
-                    <FrequencyResponseTable wallSelect={wallSelect} abscissa={wallData.abscissa} rbValue={rbData}/>
+                    <FrequencyResponseTable setTableData={setTableData} wallSelect={wallSelect} abscissa={wallData.abscissa} rbValue={rbData.Rb}/>
                 )}
+                <FloatButton.Group
+                    trigger="click"
+                    type="primary"
+                    style={{right: 24}}
+                    icon={<MenuOutlined/>}
+                >
+                    {showTable && (
+                        <FloatButton tooltip={<div>Сформировать документ</div>}
+                                     onClick={() => handleExportToWord(constructionType,wallSelect,plasterData,wallData,rbData, tableData)}
+                                     icon={<FileWordOutlined/>}/>
+                    )}
+                    <FloatButton tooltip={<div>Начать заново</div>} onClick={() => window.location.reload()}
+                                 icon={<ReloadOutlined/>}/>
+                </FloatButton.Group>
             </div>
         </div>
     );

@@ -2,9 +2,10 @@ import { Table } from 'antd';
 import PropTypes from "prop-types";
 import { Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
+import {useEffect} from "react";
 Chart.register(...registerables);
 
-const FrequencyResponseTable = ({ abscissa, rbValue, wallSelect }) => {
+const FrequencyResponseTable = ({ abscissa, rbValue, wallSelect, setTableData }) => {
     const frequencies = [100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150];
     const evaluationCurve = [33, 36, 39, 42, 45, 48, 51, 52, 53, 54, 55, 56, 56, 56, 56, 56];
 
@@ -35,6 +36,7 @@ const FrequencyResponseTable = ({ abscissa, rbValue, wallSelect }) => {
     const shiftedEvaluationCurve = evaluationCurve.map(value => value + bestShift);
     const shiftedDeviations = finalRbValues.map((value, index) => value - shiftedEvaluationCurve[index]);
 
+
     const columns = frequencies.map(frequency => ({
         title: `${frequency} Гц`,
         dataIndex: `f${frequency}`,
@@ -49,6 +51,10 @@ const FrequencyResponseTable = ({ abscissa, rbValue, wallSelect }) => {
         data[3][`f${frequency}`] = shiftedEvaluationCurve[index] + ' дБ';
         data[4][`f${frequency}`] = shiftedDeviations[index] + ' дБ';
     });
+
+    useEffect(() => {
+        setTableData(data)
+    }, []);
 
     const chartData = {
         labels: frequencies.map(freq => `${freq} Гц`),
@@ -101,6 +107,7 @@ FrequencyResponseTable.propTypes = {
     abscissa: PropTypes.number.isRequired,
     rbValue: PropTypes.number.isRequired,
     wallSelect: PropTypes.number.isRequired,
+    setTableData:PropTypes.func.isRequired
 };
 
 export default FrequencyResponseTable;

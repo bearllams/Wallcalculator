@@ -10,6 +10,7 @@ const OrdinateCalculator = ({wallData, plasterData, setRbData, constructionTypeW
     const [selectedK, setSelectedK] = useState(null);
     const [form] = Form.useForm();
     const [formDisabled, setFormDisabled] = useState(true)
+    const [fieldsDisabled, setFieldsDisabled] = useState(false)
     const [localPlasterData, setLocalPlasterData] = useState({
         plasterDensity: 0,
         K: 0,
@@ -57,8 +58,15 @@ const OrdinateCalculator = ({wallData, plasterData, setRbData, constructionTypeW
                 const wallTerm =  wallSelect === "multivalue" ? wallData.density * hPriv * kWall: wallData.density * wallThicknessMeters * kWall;
                 const plasterTerm = plasterThicknessMeters > 0 ? parseFloat(plasterData.plasterDensity) * plasterThicknessMeters * kPlaster : 0;
                 const Rb = 20 * Math.log10(wallTerm + plasterTerm) - 12;
-                setRbData(Math.ceil(Rb.toFixed(2)));
+                const rbDataValue = {
+                    Rb: Math.ceil(Rb.toFixed(2)),
+                    constructionType: constructionType,
+                    material: materialType,
+                    densityAndK: `${materialType && densityOptions[materialType].find(opt => opt.K === selectedK).range}, K: ${selectedK}`
+                };
+                setRbData(rbDataValue);
                 message.success(`Рассчитанное значение Rb: ${Math.ceil(Rb.toFixed(2))}`);
+                setFieldsDisabled(true)
             })
             .catch(info => {
                 console.log('Validate Failed:', info);
@@ -78,6 +86,7 @@ const OrdinateCalculator = ({wallData, plasterData, setRbData, constructionTypeW
                 form={form}
                 onValuesChange={handleFormChange}
                 onFinish={calculateRb}
+                disabled={fieldsDisabled}
             >
                 {(wallSelect !== "monolite" && wallSelect !== 'multivalue') &&
                     <Form.Item
@@ -155,7 +164,7 @@ const OrdinateCalculator = ({wallData, plasterData, setRbData, constructionTypeW
                         type="primary"
                         onClick={calculateRb}
                         disabled={
-                            formDisabled
+                            formDisabled || fieldsDisabled
                         }
                     >
                         Рассчитать Rb
